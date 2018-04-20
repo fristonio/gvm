@@ -1,0 +1,8 @@
+*.test
+*.o
+*.out
+*.so
+tmp/
+.DS_Store
+
+
