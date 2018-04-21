@@ -20,12 +20,19 @@ func main() {
 	// Version information are retrived from the version/version.go which is populated at
 	// build time using ldflags
 	if *versionFlag {
-		fmt.Printf("gvm version : %s(%s)\n", version.Info["version"], version.Info["branch"])
+		fmt.Printf(version.VersionStr,
+			version.Info["version"],
+			version.Info["revision"],
+			version.Info["branch"],
+			version.Info["buildUser"],
+			version.Info["buildDate"],
+			version.Info["goVersion"])
 		os.Exit(0)
 	}
 
 	if len(args) == 0 {
-		log.Error("No arguments are supplied")
+		log.Warn("No arguments are supplied")
 		flag.Usage()
+		os.Exit(0)
 	}
 }
