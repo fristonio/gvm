@@ -22,18 +22,30 @@ const (
 )
 
 type Logger struct {
-	out io.Writer // destination for output
+	out              io.Writer // destination for output
+	infoPrefix       string
+	logPrefix        string
+	warnPrefix       string
+	errorPrefix      string
+	resetColorSuffix string
 }
 
 // Returns a new console logger
 func New(out io.Writer) *Logger {
-	return &Logger{out: out}
+	return &Logger{
+		out:              out,
+		infoPrefix:       fmt.Sprintf("%s[*] ", Blue),
+		logPrefix:        fmt.Sprint("[+] "),
+		warnPrefix:       fmt.Sprintf("%s[!] ", Yellow),
+		errorPrefix:      fmt.Sprintf("%s[-] ", Red),
+		resetColorSuffix: fmt.Sprintf("%s\n", Reset),
+	}
 }
 
 // Print output to logger output writer
 func (l *Logger) Output(s string) error {
 	writer := ansicolor.NewAnsiColorWriter(l.out)
-	_, err := fmt.Fprintf(writer, s)
+	_, err := fmt.Fprintf(writer, s+l.resetColorSuffix)
 	return err
 }
 
@@ -44,35 +56,43 @@ func (l *Logger) Printf(format string, v ...interface{}) {
 
 // Logs log
 func (l *Logger) Log(v ...interface{}) {
-	prefix := fmt.Sprint("[+] ")
-	suffix := fmt.Sprintf("%s\n", Reset)
-	l.Output(prefix + fmt.Sprint(v...) + suffix)
+	l.Output(l.logPrefix + fmt.Sprint(v...))
+}
+
+func (l *Logger) Logf(format string, v ...interface{}) {
+	l.Output(l.logPrefix + fmt.Sprintf(format, v...))
 }
 
 // Logs info
 func (l *Logger) Info(v ...interface{}) {
-	prefix := fmt.Sprintf("%s[*] ", Blue)
-	suffix := fmt.Sprintf("%s\n", Reset)
-	l.Output(prefix + fmt.Sprint(v...) + suffix)
+	l.Output(l.infoPrefix + fmt.Sprint(v...))
+}
+
+func (l *Logger) Infof(format string, v ...interface{}) {
+	l.Output(l.infoPrefix + fmt.Sprintf(format, v...))
 }
 
 // Logs warning
 func (l *Logger) Warn(v ...interface{}) {
-	prefix := fmt.Sprintf("%s[!] ", Yellow)
-	suffix := fmt.Sprintf("%s\n", Reset)
-	l.Output(prefix + fmt.Sprint(v...) + suffix)
+	l.Output(l.warnPrefix + fmt.Sprint(v...))
 }
 
-// Logs info
+func (l *Logger) Warnf(format string, v ...interface{}) {
+	l.Output(l.warnPrefix + fmt.Sprintf(format, v...))
+}
+
+// Logs error
 func (l *Logger) Error(v ...interface{}) {
-	prefix := fmt.Sprintf("%s[-] ", Red)
-	suffix := fmt.Sprintf("%s\n", Reset)
-	l.Output(prefix + fmt.Sprint(v...) + suffix)
+	l.Output(l.errorPrefix + fmt.Sprint(v...))
+}
+
+func (l *Logger) Errorf(format string, v ...interface{}) {
+	l.Output(l.errorPrefix + fmt.Sprintf(format, v...))
 }
 
 // Fatal is equivalent to l.Print() followed by a call to os.Exit(1).
 func (l *Logger) Fatal(v ...interface{}) {
-	l.Output(fmt.Sprint(v...))
+	l.Output(l.errorPrefix + fmt.Sprint(v...))
 	os.Exit(1)
 }
 
@@ -92,3 +112,5 @@ func (l *Logger) Panicf(format string, v ...interface{}) {
 	l.Output(s)
 	panic(s)
 }
+
+var Log *Logger = New(os.Stdout)
