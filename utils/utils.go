@@ -2,7 +2,9 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"net"
+	"path/filepath"
 )
 
 const (
@@ -47,5 +49,57 @@ func MkdirIfNotExist(folder string) error {
 			return err
 		}
 	}
+	return nil
+}
+
+// Remove downloaded file partials corresponding to the url
+func RemoveFilePartials(url string) error {
+	file = filepath.Base(url)
+	downloadsDirectory := filepath.Join(utils.GVM_ROOT_DIR, utils.GVM_DOWNLOAD_DIR)
+	files := filepath.Glob(filepath.Join(downloadsDirectory, fmt.Sprintf("%s.part*", file)))
+	err = RemoveAll
+	if err != nil {
+		return err
+	}
+}
+
+func RemoveAll(files []string) error {
+	for _, file := range files {
+		err = os.Remove(file)
+		if err != nil {
+			return err
+		}
+	}
+}
+
+// Gets a list of files and joins them into a single file with name out
+func JoinFilePartials(files []string, out string) error {
+	// Sort the file names so that they are joined in the correct order
+	sort.Strings(files)
+	downloadsDirectory := filepath.Join(utils.GVM_ROOT_DIR, utils.GVM_DOWNLOAD_DIR)
+
+	log.Info("Starting to Join file partials")
+
+	outf, err := os.OpenFile(filepath.Join(downloadsDirectory, out), os.O_CREATE|os.O_WRONLY, 0600)
+	defer outf.Close()
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		if err = copy(f, outf); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func copy(from string, to io.Writer) error {
+	f, err := os.OpenFile(from, os.O_RDONLY, 0600)
+	defer f.Close()
+	if err != nil {
+		return err
+	}
+	io.Copy(to, f)
 	return nil
 }
