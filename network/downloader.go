@@ -2,18 +2,22 @@ package network
 
 import (
 	"os"
-	"runtime"
+	"os/signal"
+	"path/filepath"
+	"syscall"
 
+	"github.com/fristonio/gvm/logger"
 	"github.com/fristonio/gvm/utils"
 )
 
 var log *logger.Logger = logger.New(os.Stdout)
 
 // Download the contents of the given URL
-func Download(url string, skiptls bool) {
+func Download(url string, skiptls bool, conn int64) {
 	var err error
 	// We are taking maximum no of concurrent downloads to be conn.
-	var conn int = runtime.NumCPU()
+
+	var files []string
 
 	// Create a singal channel to catch system interrupts
 	signal_chan := make(chan os.Signal, 1)
@@ -34,14 +38,14 @@ func Download(url string, skiptls bool) {
 	downloader = NewDownloader(url, conn, true)
 
 	// Start a goroutine for the download
-	go downloader.Download(doneChan, fileChan, errorChan, interruptChan)
+	go downloader.Do(doneChan, fileChan, errorChan, interruptChan)
 
 	for {
 		select {
 		case <-signal_chan:
 			// send parts number of interrupt for each routine
 			isInterrupted = true
-			for i := 0; i < conn; i++ {
+			for i := int64(0); i < conn; i++ {
 				interruptChan <- true
 			}
 		case file := <-fileChan:
@@ -59,15 +63,15 @@ func Download(url string, skiptls bool) {
 				log.Warn("Download was interrupted ....")
 				log.Warn("Cleaning things up.")
 				err = utils.RemoveFilePartials(url)
-				FatalCheck(err)
+				utils.FatalCheck(err, "Error occured while removing partial downloads")
 				return
 			} else {
 				// Download finished successfully, now join the partial downloads to a single file
 				log.Info("Download finished, working on joining partials...")
 				err = utils.JoinFilePartials(files, filepath.Base(url))
-				FatalCheck(err)
-				err = utils.RemoveFilePartials(url)
-				FatalCheck(err)
+				utils.FatalCheck(err, "Partial Join of files failed")
+				utils.RemoveFilePartials(url)
+				utils.FatalCheck(err, "Exitting....")
 				return
 			}
 		}

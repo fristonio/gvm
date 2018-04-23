@@ -4,11 +4,17 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"path/filepath"
+	"sort"
+
+	"github.com/fristonio/gvm/logger"
 )
 
-const (
-	GVM_ROOT_DIR     string = "~/.gvm"
+var Log *logger.Logger = logger.New(os.Stdout)
+
+var (
+	GVM_ROOT_DIR     string = filepath.Join(os.Getenv("HOME"), ".gvm")
 	GVM_DOWNLOAD_DIR string = "downloads"
 )
 
@@ -28,14 +34,16 @@ func GetIPv4StringArray(ips []net.IP) []string {
 // Takes byte count in integer format as input and returns a string describing download
 // size denoted by the bytecount
 func MemoryBytesToString(byteCount int64) string {
+	Log.Infof("Bytes : %v", byteCount)
+	var downloadSize string
 	if byteCount < 1024 {
-		downloadSize := fmt.Sprintf("%d Bytes", byteCount)
+		downloadSize = fmt.Sprintf("%d Bytes", byteCount)
 	} else if byteCount < 1024*1024 {
-		downloadSize := fmt.Sprintf("%.1f KBs", float64(byteCount)/1024)
-	} else if byteCount < 1024*1024 {
-		downloadSize := fmt.Sprintf("%.1f MBs", float64(byteCount)/(1024*1024))
+		downloadSize = fmt.Sprintf("%.1f KBs", float64(byteCount)/1024)
+	} else if byteCount < 1024*1024*1024 {
+		downloadSize = fmt.Sprintf("%.1f MBs", float64(byteCount)/(1024*1024))
 	} else {
-		downloadSize := fmt.Sprintf("%.1f GBs", float64(byteCount)/(1024*1024*1024))
+		downloadSize = fmt.Sprintf("%.1f GBs", float64(byteCount)/(1024*1024*1024))
 	}
 
 	return downloadSize
@@ -54,31 +62,30 @@ func MkdirIfNotExist(folder string) error {
 
 // Remove downloaded file partials corresponding to the url
 func RemoveFilePartials(url string) error {
-	file = filepath.Base(url)
-	downloadsDirectory := filepath.Join(utils.GVM_ROOT_DIR, utils.GVM_DOWNLOAD_DIR)
-	files := filepath.Glob(filepath.Join(downloadsDirectory, fmt.Sprintf("%s.part*", file)))
-	err = RemoveAll
-	if err != nil {
-		return err
-	}
+	file := filepath.Base(url)
+	downloadsDirectory := filepath.Join(GVM_ROOT_DIR, GVM_DOWNLOAD_DIR)
+	files, _ := filepath.Glob(downloadsDirectory + fmt.Sprintf("%s.part*", file))
+	err := RemoveAll(files)
+	return err
 }
 
 func RemoveAll(files []string) error {
 	for _, file := range files {
-		err = os.Remove(file)
+		err := os.Remove(file)
 		if err != nil {
 			return err
 		}
 	}
+	return nil
 }
 
 // Gets a list of files and joins them into a single file with name out
 func JoinFilePartials(files []string, out string) error {
 	// Sort the file names so that they are joined in the correct order
 	sort.Strings(files)
-	downloadsDirectory := filepath.Join(utils.GVM_ROOT_DIR, utils.GVM_DOWNLOAD_DIR)
+	downloadsDirectory := filepath.Join(GVM_ROOT_DIR, GVM_DOWNLOAD_DIR)
 
-	log.Info("Starting to Join file partials")
+	Log.Info("Starting to Join file partials")
 
 	outf, err := os.OpenFile(filepath.Join(downloadsDirectory, out), os.O_CREATE|os.O_WRONLY, 0600)
 	defer outf.Close()
