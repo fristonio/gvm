@@ -6,7 +6,9 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
+	"strconv"
 
 	"github.com/fristonio/gvm/logger"
 )
@@ -14,9 +16,16 @@ import (
 var Log *logger.Logger = logger.New(os.Stdout)
 
 var (
-	GVM_ROOT_DIR     string = filepath.Join(os.Getenv("HOME"), ".gvm")
-	GVM_DOWNLOAD_DIR string = "downloads"
+	GVM_ROOT_DIR     string         = filepath.Join(os.Getenv("HOME"), ".gvm")
+	GVM_DOWNLOAD_DIR string         = "downloads"
+	GVM_GOS_DIRNAME  string         = "gos"
+	GOS_REGEXP       *regexp.Regexp = getGosRegexp()
 )
+
+func getGosRegexp() *regexp.Regexp {
+	gosRegexp, _ := regexp.Compile(`^go[\d\.]+$`)
+	return gosRegexp
+}
 
 // Returns a string of IPv4 address from a list of IPs returned after lookup
 // of a hostname for IPs
@@ -109,4 +118,14 @@ func copy(from string, to io.Writer) error {
 	}
 	io.Copy(to, f)
 	return nil
+}
+
+func PrintInstalledGos(gos []string) {
+	if len(gos) == 0 {
+		Log.Warn("No gos installed, to view a list of versions available use: go list-remote")
+		return
+	}
+	for i, f := range gos {
+		fmt.Println(strconv.Itoa(i+1) + ". " + f)
+	}
 }

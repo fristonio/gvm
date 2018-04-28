@@ -3,9 +3,9 @@ package network
 import (
 	"fmt"
 	"net/http"
-	"regexp"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/fristonio/gvm/utils"
 )
 
 type Release struct {
@@ -19,7 +19,7 @@ const (
 )
 
 // Parses the available release of golang to install
-func ParseGoReleases(log bool) ([]Release, error) {
+func ParseGoReleases(shouldLog bool) ([]Release, error) {
 	log.Info("Releases of go available for download are ")
 	releases := make([]Release, 0)
 
@@ -35,13 +35,9 @@ func ParseGoReleases(log bool) ([]Release, error) {
 	}
 	doc.Find(fmt.Sprintf(".%s", "RefList-item")).Each(func(i int, s *goquery.Selection) {
 		releaseName := s.Find("a").Text()
-		re, err := regexp.Compile(`^go[\d\.]+$`)
-		if err != nil {
-			return
-		}
 
-		if re.FindString(releaseName) != "" {
-			if log {
+		if utils.GOS_REGEXP.FindString(releaseName) != "" {
+			if shouldLog {
 				fmt.Println("    " + releaseName)
 			}
 			releases = append(releases, Release{
