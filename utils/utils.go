@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strconv"
 
@@ -15,12 +14,7 @@ import (
 
 var Log *logger.Logger = logger.New(os.Stdout)
 
-var (
-	GVM_ROOT_DIR     string         = filepath.Join(os.Getenv("HOME"), ".gvm")
-	GVM_DOWNLOAD_DIR string         = "downloads"
-	GVM_GOS_DIRNAME  string         = "gos"
-	GOS_REGEXP       *regexp.Regexp = getGosRegexp()
-)
+var GOS_REGEXP *regexp.Regexp = getGosRegexp()
 
 func getGosRegexp() *regexp.Regexp {
 	gosRegexp, _ := regexp.Compile(`^go[\d\.]+$`)
@@ -127,5 +121,28 @@ func PrintInstalledGos(gos []string) {
 	}
 	for i, f := range gos {
 		fmt.Println(strconv.Itoa(i+1) + ". " + f)
+	}
+}
+
+// Checks if a directory is present, if it is return no error if not
+// Create the provide directory structure provided in dirString creating all necessery parents
+func CreateDirStrucutre(dirString string) error {
+	_, err := os.Stat(path)
+	if err == nil {
+		return nil
+	}
+	if os.IsNotExist(err) {
+		err := os.MkdirAll(dirString, 0660)
+		return err
+	}
+}
+
+func CheckIfDirExist(dirString string) error {
+	_, err := os.Stat(path)
+	if err == nil {
+		return nil
+	}
+	if os.IsNotExist(err) {
+		return err
 	}
 }
