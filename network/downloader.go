@@ -13,7 +13,7 @@ import (
 var log *logger.Logger = logger.New(os.Stdout)
 
 // Download the contents of the given URL
-func Download(url string, skiptls bool, conn int64) {
+func Download(url string, skiptls bool, conn int64, forceClean bool) error {
 	var err error
 	// We are taking maximum no of concurrent downloads to be conn.
 
@@ -36,6 +36,17 @@ func Download(url string, skiptls bool, conn int64) {
 
 	var downloader *HttpDownloader
 	downloader = NewDownloader(url, conn, true)
+	// Verfiy and clean already downloaded files in downloads directory.
+	if err := downloader.VerifyDownloadDestination(); err != nil {
+		log.Errorf("An error occured while verifying download destination : %v", err)
+		if forceClean {
+			if e := downloader.ClearPreviousDownload(); e != nil {
+				return e
+			}
+		} else {
+			return err
+		}
+	}
 
 	// Start a goroutine for the download
 	go downloader.Do(doneChan, fileChan, errorChan, interruptChan)
@@ -76,4 +87,5 @@ func Download(url string, skiptls bool, conn int64) {
 			}
 		}
 	}
+	return nil
 }

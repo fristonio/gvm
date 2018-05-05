@@ -9,8 +9,8 @@ import (
 )
 
 type Release struct {
-	name        string
-	downloadUrl string
+	Name        string
+	DownloadUrl string
 }
 
 const (
@@ -41,8 +41,8 @@ func ParseGoReleases(shouldLog bool) ([]Release, error) {
 				fmt.Println("    " + releaseName)
 			}
 			releases = append(releases, Release{
-				name:        releaseName,
-				downloadUrl: fmt.Sprintf(BASE_DOWNLOAD_URL, releaseName),
+				Name:        releaseName,
+				DownloadUrl: fmt.Sprintf(BASE_DOWNLOAD_URL, releaseName),
 			})
 		}
 	})

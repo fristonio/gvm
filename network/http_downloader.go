@@ -121,6 +121,35 @@ func calculateDownloadParts(parts int64, contentLength int64, url string) []Part
 	return fileParts
 }
 
+// Check if the parts and the file does not already exist in the download directory
+// Return error if they are already present.
+func (d *HttpDownloader) VerifyDownloadDestination() error {
+	goSourcePath := filepath.Join(utils.GVM_ROOT_DIR, utils.GVM_DOWNLOAD_DIR, d.fileName)
+	if _, err := os.Stat(goSourcePath); os.IsNotExist(err) {
+		return err
+	}
+
+	for _, part := range d.fileParts {
+		_, err := os.Stat(part.Path)
+		if os.IsNotExist(err) {
+			return err
+		}
+	}
+	return nil
+}
+
+// Clear/Remove already downloaded parts or file form downloads directory
+func (d *HttpDownloader) ClearPreviousDownload() error {
+	if err := utils.RemoveFilePartials(d.downloadUrl); err != nil {
+		return err
+	}
+	goSourcePath := filepath.Join(utils.GVM_ROOT_DIR, utils.GVM_DOWNLOAD_DIR, d.fileName)
+	if err := utils.RemoveAll([1]string{goSourcePath}); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (d *HttpDownloader) Do(doneChan chan bool, fileChan chan string, errorChan chan error, interruptChan chan bool) {
 	// Sync is for syncronization when implementing concurrency patterns
 	// WaitGroup wait for a collection of goroutines to finish
