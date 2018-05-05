@@ -75,7 +75,7 @@ func Download(url string, skiptls bool, conn int64, forceClean bool) error {
 				log.Warn("Cleaning things up.")
 				err = utils.RemoveFilePartials(url)
 				utils.FatalCheck(err, "Error occured while removing partial downloads")
-				return
+				return nil
 			} else {
 				// Download finished successfully, now join the partial downloads to a single file
 				log.Info("Download finished, working on joining partials...")
@@ -83,7 +83,7 @@ func Download(url string, skiptls bool, conn int64, forceClean bool) error {
 				utils.FatalCheck(err, "Partial Join of files failed")
 				utils.RemoveFilePartials(url)
 				utils.FatalCheck(err, "Exitting....")
-				return
+				return nil
 			}
 		}
 	}

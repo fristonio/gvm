@@ -125,13 +125,13 @@ func calculateDownloadParts(parts int64, contentLength int64, url string) []Part
 // Return error if they are already present.
 func (d *HttpDownloader) VerifyDownloadDestination() error {
 	goSourcePath := filepath.Join(utils.GVM_ROOT_DIR, utils.GVM_DOWNLOAD_DIR, d.fileName)
-	if _, err := os.Stat(goSourcePath); os.IsNotExist(err) {
+	if _, err := os.Stat(goSourcePath); !os.IsNotExist(err) {
 		return err
 	}
 
 	for _, part := range d.fileParts {
 		_, err := os.Stat(part.Path)
-		if os.IsNotExist(err) {
+		if !os.IsNotExist(err) {
 			return err
 		}
 	}
@@ -144,7 +144,7 @@ func (d *HttpDownloader) ClearPreviousDownload() error {
 		return err
 	}
 	goSourcePath := filepath.Join(utils.GVM_ROOT_DIR, utils.GVM_DOWNLOAD_DIR, d.fileName)
-	if err := utils.RemoveAll([1]string{goSourcePath}); err != nil {
+	if err := utils.RemoveAll([]string{goSourcePath}); err != nil {
 		return err
 	}
 	return nil

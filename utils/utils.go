@@ -70,7 +70,7 @@ func MkdirIfNotExist(folder string) error {
 func RemoveFilePartials(url string) error {
 	file := filepath.Base(url)
 	downloadsDirectory := filepath.Join(GVM_ROOT_DIR, GVM_DOWNLOAD_DIR)
-	files, _ := filepath.Glob(downloadsDirectory + fmt.Sprintf("%s.part*", file))
+	files, _ := filepath.Glob(downloadsDirectory + fmt.Sprintf("/%s.part*", file))
 	err := RemoveAll(files)
 	return err
 }
@@ -154,6 +154,14 @@ func CheckIfDirExist(dirString string) error {
 
 // Untar source to destination
 func UntarToDestination(source string, destination string) error {
+	if _, err := os.Stat(destination); err == nil {
+		os.RemoveAll(destination)
+	}
+
+	if e := MkdirIfNotExist(destination); e != nil {
+		return e
+	}
+
 	file, e := os.Open(source)
 	defer file.Close()
 	if e != nil {
@@ -210,13 +218,12 @@ func UntarToDestination(source string, destination string) error {
 			if err != nil {
 				return err
 			}
-			defer f.Close()
 
 			// copy over contents
 			if _, err := io.Copy(f, tr); err != nil {
 				return err
 			}
+			f.Close()
 		}
 	}
-}
 }
