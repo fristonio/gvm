@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 
@@ -127,22 +128,24 @@ func PrintInstalledGos(gos []string) {
 // Checks if a directory is present, if it is return no error if not
 // Create the provide directory structure provided in dirString creating all necessery parents
 func CreateDirStrucutre(dirString string) error {
-	_, err := os.Stat(path)
+	_, err := os.Stat(dirString)
 	if err == nil {
 		return nil
 	}
 	if os.IsNotExist(err) {
-		err := os.MkdirAll(dirString, 0660)
+		err := os.MkdirAll(dirString, 0755)
 		return err
 	}
+	return nil
 }
 
 func CheckIfDirExist(dirString string) error {
-	_, err := os.Stat(path)
+	_, err := os.Stat(dirString)
 	if err == nil {
 		return nil
 	}
 	if os.IsNotExist(err) {
 		return err
 	}
+	return nil
 }
