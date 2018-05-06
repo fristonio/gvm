@@ -21,15 +21,15 @@ var (
 var ENV_FILE string = `#!/bin/bash
 # Auto generated shell script to enable an environment for gos
 
-export GVM_ROOT; GVM_ROOT="%s"
-export GVM_GO_VERSION; GVM_GO_VERSION="%s"
-export GVM_PACKAGESET_NAME; GVM_PACKAGESET_NAME="%s"
-export GOROOT; GOROOT="%s"
-export GOPATH; GOPATH="%s"
-export GVM_OVERLAY_PREFIX; GVM_OVERLAY_PREFIX="%s"
-export PATH; PATH="%s"
-export LD_LIBRARY_PATH; LD_LIBRARY_PATH="%s"
-export DYLD_LIBRARY_PATH; DYLD_LIBRARY_PATH="%s"
-export PKG_CONFIG_PATH; PKG_CONFIG_PATH="%s"
+export GVM_ROOT="%s"
+export GVM_GO_VERSION="%s"
+export GVM_PACKAGESET_NAME="%s"
+export GOROOT="%s"
+export GOPATH="%s"
+export GVM_OVERLAY_PREFIX="%s"
+export PATH="%s"
+export LD_LIBRARY_PATH="%s"
+export DYLD_LIBRARY_PATH="%s"
+export PKG_CONFIG_PATH="%s"
 
 `

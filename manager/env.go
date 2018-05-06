@@ -56,6 +56,7 @@ func CreateGlobalPackageSets(goVersion string) error {
 // Which creates the required environment for that version of go
 // version specifies the version of the golang we are creating the env for
 func CreateEnvironmentFile(goVersion string) error {
+	CreateGlobalPackageSets(goVersion)
 	if utils.GOS_REGEXP.FindString(goVersion) == "" {
 		errStr := fmt.Sprintf("Not a valid go name %s to create environment", goVersion)
 		utils.Log.Warn(errStr)
