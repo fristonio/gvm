@@ -66,6 +66,13 @@ func MkdirIfNotExist(folder string) error {
 	return nil
 }
 
+func CheckIfAlreadyExist(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
 // Remove downloaded file partials corresponding to the url
 func RemoveFilePartials(url string) error {
 	file := filepath.Base(url)

@@ -58,31 +58,8 @@ Then install build it to be used`,
 				os.Exit(1)
 			}
 
-			utils.Log.Infof("Beggining to download source for %s", goRelease.Name)
-			if err := network.Download(goRelease.DownloadUrl, true, 4, false); err != nil {
-				if forceNewDownload() {
-					if e := network.Download(goRelease.DownloadUrl, true, 4, true); e != nil {
-						utils.Log.Error("An error occured while downloading go from source")
-						os.Exit(1)
-					}
-				} else {
-					utils.Log.Error("Error while downloading go version source")
-					os.Exit(1)
-				}
-			}
-			utils.Log.Info("Download completed...")
-
-			utils.Log.Info("Unzipping the downloaded source ...")
-			err = utils.UntarToDestination(
-				filepath.Join(utils.GVM_ROOT_DIR,
-					utils.GVM_DOWNLOAD_DIR,
-					filepath.Base(goRelease.DownloadUrl),
-				),
-				filepath.Join(utils.GVM_ROOT_DIR,
-					utils.GVM_GOS_DIRNAME,
-					goRelease.Name,
-				),
-			)
+			manageReleaseDownload(goRelease)
+			manageCompressedDownload(goRelease)
 
 			// Compile the source of go obtained
 			utils.Log.Info("Compiling go from source")
@@ -108,4 +85,47 @@ func forceNewDownload() bool {
 		return true
 	}
 	return false
+}
+
+func manageReleaseDownload(goRelease network.Release) {
+	downloadPath := filepath.Join(utils.GVM_ROOT_DIR, utils.GVM_DOWNLOAD_DIR, filepath.Base(goRelease.DownloadUrl))
+	if !utils.CheckIfAlreadyExist(downloadPath) {
+		utils.Log.Infof("Beggining to download source for %s", goRelease.Name)
+		if err := network.Download(goRelease.DownloadUrl, true, 4, false); err != nil {
+			if forceNewDownload() {
+				if e := network.Download(goRelease.DownloadUrl, true, 4, true); e != nil {
+					utils.Log.Error("An error occured while downloading go from source")
+					os.Exit(1)
+				}
+			} else {
+				utils.Log.Error("Error while downloading go version source")
+				os.Exit(1)
+			}
+		}
+		utils.Log.Info("Download completed...")
+	} else {
+		utils.Log.Infof("Found a cached copy for %s", goRelease.Name)
+	}
+}
+
+func manageCompressedDownload(goRelease network.Release) {
+	utils.Log.Info("Unzipping the downloaded source ...")
+	source := filepath.Join(
+		utils.GVM_ROOT_DIR,
+		utils.GVM_DOWNLOAD_DIR,
+		filepath.Base(goRelease.DownloadUrl),
+	)
+	destination := filepath.Join(
+		utils.GVM_ROOT_DIR,
+		utils.GVM_GOS_DIRNAME,
+		goRelease.Name,
+	)
+
+	if utils.CheckIfAlreadyExist(source) {
+		err := utils.UntarToDestination(source, destination)
+		if err != nil {
+			utils.Log.Infof("Error while trying to decompress source : %v", err)
+			os.Exit(1)
+		}
+	}
 }
