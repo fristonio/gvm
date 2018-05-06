@@ -1,6 +1,6 @@
 ### Compiling and installing a new version of golang alongside with others
 
-* To install another go version from source we need to have go compiler available in our system. Since golang is writtern in go so to compile it we need this compiler.
+* Go 1.5+ removed the C compilers from the toolchain and replaced them with one written in Go. This creates a bootstrapping problem if we don't already have a working Go install. In order to compile Go 1.5+, make sure Go 1.4 is installed first.
 
 * While installing go from source there is a catch in setting the environment variables so that it gets compiled at the required place and not somewhere else. These environment variables defines the installation behaviour for go.
 
