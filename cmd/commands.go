@@ -36,4 +36,5 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(listRemoteCmd)
 	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(installCmd)
 }
