@@ -1,6 +1,6 @@
 # Go Version Manager
 
-> GVM is a simple and clean go version manager in go itself, because why not. 
+> GVM is a simple and clean go version manager in GO itself. 
 It provides command line interface to manage go versions.
 
 ## Background
@@ -9,7 +9,7 @@ It is a hobby project which I made while learning Go. Go unlike Node.js and othe
 standard version manager, there are some open source alternatives but they are too buggy to be used.
 I developed this keeping simplicity in mind, it solves all the painful tasks involved when someone is dealing
 with multiple version of go. This is not a full fledged tool to meet all the requirements, but it performs
-well to serve the pupose it was made for.
+well to serve the purpose it was made for.
 
 Do give a read to [Installing a new go version](/docs/new_installation.md).
 
@@ -19,6 +19,7 @@ Clone the github repository, or get the latest release from github.
 
 ```bash
 $ cd gvm
+$ dep ensure
 $ make build
 ```
 
