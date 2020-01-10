@@ -16,3 +16,4 @@ before_script:
 
 script:
     - test -z $(gofmt -s -l $GO_FILES)
+    - ls
